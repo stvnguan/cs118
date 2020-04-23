@@ -8,6 +8,32 @@
 #include <netdb.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
+#include <string>
+#include <iostream>
+#include <fstream>
+
+const int FILE_START_IND = 5;
+const std::string HTML_TEXT_CONTENT_TYPE = "text/html";
+const std::string PLAIN_TEXT_CONTENT_TYPE = "text/plain; charset=UTF-8";
+const std::string PNG_IMAGE_CONTENT_TYPE = "image/png";
+const std::string JPG_IMAGE_CONTENT_TYPE = "image/jpg";
+const std::string BINARY_FILE_CONTENT_TYPE = "application/octet-stream";
+
+std::string GetFileName(const char* recv_buffer_c) {
+ std::string recv_buffer = recv_buffer_c;
+ int file_name_length = recv_buffer.find(' ', FILE_START_IND) - FILE_START_IND;
+ return recv_buffer.substr(FILE_START_IND, file_name_length);
+}
+
+std::string GetFileType(std::string file_name) {
+ int file_type_start_ind = file_name.find('.') + 1;
+ // If file_type_start_ind is 0, that means no dot is found;
+ if (file_type_start_ind == 0) {
+  return "";
+ }
+ return file_name.substr(file_type_start_ind, file_name.size() - file_type_start_ind);
+}
+
 
 int main()
 {
@@ -58,7 +84,32 @@ int main()
        close(client_fd);
        exit(0);
      }
-     write(client_fd, recv_buf, recv_buf_size);
+     std::string file_name = GetFileName(recv_buf);
+     std::string file_type = GetFileType(file_name);
+
+     std::ifstream requested_file(file_name);
+     std::string file_contents((std::istreambuf_iterator<char>(requested_file)),
+                         std::istreambuf_iterator<char>());
+
+     std::string content_type = "";
+     if (file_type == "html")
+      content_type = HTML_TEXT_CONTENT_TYPE;
+     else if (file_type == "txt")
+      content_type = PLAIN_TEXT_CONTENT_TYPE;
+     else if (file_type == "jpg")
+      content_type = JPG_IMAGE_CONTENT_TYPE;
+     else if (file_type == "png")
+      content_type = PNG_IMAGE_CONTENT_TYPE;
+     else
+      content_type = BINARY_FILE_CONTENT_TYPE;
+
+     std::string response = "HTTP/1.1 200 OK\r\nContent-Length: " +
+                            std::to_string(file_contents.size()) +
+                            "\r\nContent-Type: " + content_type +
+                            "\r\n\r\n" + file_contents;
+     std::cout << response;
+
+     write(client_fd, response.c_str(), response.size());
    }
    if (recv_buf_size < 0) {
      close(client_fd);

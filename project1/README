@@ -1,0 +1,36 @@
+Name: Steven Guan
+email: stvnguan@g.ucla.edu
+UCLA ID: 504806558
+
+High level design of the server:
+I started with the echo server code provided by my TA: Zhiyi.
+Essentially I wrote functions to get the file name and file type
+from the request, and then from there I set the appropriate content
+type that will eventually go in the response message. Finally, I
+constructed the response that includes the necessary headers,
+including "Content-Length" and "Content-Type", and finally the
+contents of the file itself. Then, I just pass that response to
+the write function along with the response size.
+
+Problems I ran into:
+Honestly the biggest problem was starting the server. I had no idea
+how to start writing this so I was just stuck for a while. Thankfully
+my TA helped us out by giving us some initial code so that set me up
+to succeed.
+Another problem I ran into was dealing with C-strings, and how to
+parse them. Eventually I decided to use C++ and a few of their parsing
+libraries helped out a lot. Besides these, I didn't really have problems.
+
+Libraries used:
+I used the C++ String library, iostream library (for debugging) and
+fstream library (for handling file opening and reading).
+
+Online tutorials used:
+I used a stackoverflow answer to help me load my file into a string:
+https://stackoverflow.com/questions/2602013/read-whole-ascii-file-into-c-stdstring
+
+And I used another stackoverflow answer to help me decide what are the
+possible content types:
+https://stackoverflow.com/questions/23714383/what-are-all-the-possible-values-for-http-content-type-header
+
+Other than that, things were pretty straightforward.
